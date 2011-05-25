@@ -29,19 +29,32 @@ my $command = $opts{c} || '';
 
 my $mpd = Audio::MPD->new(host => $host, port => $port);
 
-my @playlist = $mpd->playlist->as_items;
-
-# Audio::MPD doesn't have this natively, yet... but we can call it!
+# Audio::MPD doesn't have this natively... but we can call it!
 # this will remove a track from the playlist after it has been played
 $mpd->_send_command("consume 1\n");
+# update the music database...
+$mpd->updatedb();
 
-my $current = $mpd->song;
-foreach my $key (keys %$current) {
-    print "$key ";
+# get various information that will be useful during the course of operation
+# $mpd->collection->all_songs takes a while to run, 0-10s, so we want to run
+# it sparingly; processing the hash-array is fairly speedy.
+my @all_songs           = $mpd->collection->all_songs;
+my @current_playlist    = $mpd->playlist->as_items;
+my $current_song        = $mpd->song;
+
+# just a demo of how to get information from the collection...
+#my @genres  = get_info(\@all_songs,'genre');
+#my @artists = get_info(\@all_songs,'artist');
+#my @titles  = get_info(\@all_songs,'title');
+#my @albums  = get_info(\@all_songs,'album');
+
+sub get_info {
+    my $songs   = shift;
+    my $key     = shift;
+
+    my %info_hash = ();
+    foreach my $song (@$songs) {
+        $info_hash{$$song{$key}} = 1 if ($$song{$key});
+    }
+    return sort keys %info_hash;
 }
-print "\n";
-
-foreach my $song (@playlist) {
-    print "$$song{id}: $$song{artist} - $$song{title}\n";
-}
-
