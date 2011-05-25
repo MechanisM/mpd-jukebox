@@ -18,5 +18,30 @@
 use strict;
 use warnings;
 use Audio::MPD;
+use Getopt::Std;
 
+my %opts = ();
+getopts('h:p:c:', \%opts);
+
+my $host    = $opts{h} || 'localhost';
+my $port    = $opts{p} || 6600;
+my $command = $opts{c} || '';
+
+my $mpd = Audio::MPD->new(host => $host, port => $port);
+
+my @playlist = $mpd->playlist->as_items;
+
+# Audio::MPD doesn't have this natively, yet... but we can call it!
+# this will remove a track from the playlist after it has been played
+$mpd->_send_command("consume 1\n");
+
+my $current = $mpd->song;
+foreach my $key (keys %$current) {
+    print "$key ";
+}
+print "\n";
+
+foreach my $song (@playlist) {
+    print "$$song{id}: $$song{artist} - $$song{title}\n";
+}
 
