@@ -43,34 +43,31 @@ my @current_playlist    = $mpd->playlist->as_items;
 my $current_song        = $mpd->song;
 
 # just a demo of how to get information from the collection...
-my @genres  = get_info(\@all_songs,'genre');
+#my @genres  = get_info(\@all_songs,'genre');
 #my @artists = get_info(\@all_songs,'artist');
 #my @titles  = get_info(\@all_songs,'title');
 #my @albums  = get_info(\@all_songs,'album');
 
-foreach my $genre (@genres) {
-    print "$genre\n";
-}
-
-my $genre = 'techno';
-
-my @songs = find_by_genre(\@all_songs,$genre);
+my @songs = search_songs(\@all_songs,'artist','nine inch nails');
 
 foreach my $song (@songs) {
     print "$$song{artist} - $$song{title}\n";
 }
 exit;
 
-sub find_by_genre {
+sub search_songs {
     my $songs   = shift;
-    my $genre   = shift;
+    my $field   = shift;
+    my $search  = shift;
 
-    my @found_songs = ();
+    my @found   = ();
 
     foreach my $song (@$songs) {
-        push (@found_songs, $song) if ($$song{genre} =~ /$genre/i);
+        if ($$song{$field} and $$song{$field} =~ /$search/i) {
+            push @found, $song;
+        }
     }
-    return @found_songs;
+    return @found;
 }
 
 
