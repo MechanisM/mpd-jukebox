@@ -1,0 +1,82 @@
+body {
+	font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size: 8pt;
+    text-align: center;
+	background:	none repeat scroll 0 0 #000000;
+	color:		#FFF;
+}
+
+div#container {
+    display:    block;
+    position:   relative;
+    width:      100%;
+}
+
+div#main {
+    display:    block;
+}
+
+table.options {
+    margin: 10px auto;
+    width: 250px;
+}
+
+table#login {
+    margin: auto auto;
+}
+
+table#sign_up {
+    margin: auto auto;
+    text-align: right;
+}
+
+table#options {
+    width: 250px;
+    margin: auto auto;
+}
+
+p#diff_desc {
+    width: 250px;
+    margin: 10px auto;
+}
+
+table#manual_options {
+    margin: auto auto;
+    width: 250px;
+    visibility: hidden;
+}
+
+p#logout {
+    text-align: right;
+}
+
+p#head {
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+a:link {
+	color: #DDD;
+	text-decoration: none;
+}
+
+a:visited {
+	color: #DDD;
+	text-decoration: none;
+}
+
+p#bonus {
+    font-size: 18px;
+    color: #FA0080;
+    font-weight: bolder;
+    text-transform: uppercase; 
+}
+
+img#atg_img {
+    max-width: 350px;
+    max-height: 800px;
+}
+
+img#admin {
+    max-height: 350px;
+}
