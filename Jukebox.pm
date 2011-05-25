@@ -6,6 +6,7 @@ use warnings;
 
 use DBI;
 use CGI::Session qw/-ip_match/;
+use Audio::MPD;
 
 my $cgi_session =   'MPDJukebox';
 ### MySQL stuff, make this into a configuration option sometime... ###
@@ -15,10 +16,72 @@ my $sqldb       =   "mpd_jukebox";
 my $sqlhost     =   "localhost";
 ### end db config ###
 
+# also need to configurize this...
+my %mpd_options = ();
+$mpd_options{host}      = 'localhost';
+$mpd_options{port}      = '6600';
+$mpd_options{password}  = '';
+
 sub db_connect {
     my $dsn = "dbi:mysql:database=$sqldb;host=$sqlhost";
     my $dbh = DBI->connect($dsn,$sqluser,$sqlpass,{ RaiseError => 1 });
     return $dbh;
+}
+
+sub mpd_connect {
+    my $mpd = Audio::MPD->new( \%mpd_options );
+    return $mpd;
+}
+
+sub get_mpd_collection {
+    # returns an array of 'song items'
+    # this takes a short while to process, call sparingly
+    my $mpd = mpd_conect();
+    return $mpd->collection->all_songs;
+}
+
+sub get_mpd_playlist {
+    # returns an array of song items
+    my $mpd = mpd_connect();
+    return $mpd->playlist->as_items;
+}
+
+sub get_mpd_current_song {
+    my $mpd = mpd_connect();
+    return $mpd->song;
+}
+
+sub search_songs {
+    # takes an array-reference of mpd song items, the field you want to search
+    # (artist, title, genre, etc) and the query text as arguments...
+    # returns an array of song items matching the query... very simple...
+    my $songs   = shift;
+    my $field   = shift;
+    my $query   = shift;
+
+    my @found = ();
+
+    foreach my $song (@$songs) {
+        if ($$song{$field} and $$song{$field} =~ /$query/i) {
+            push @found, $song;
+        }
+    }
+    return @found;
+}
+
+sub get_music_info {
+    # takes an array-ref of song items, and finds all the unique entries for the
+    # query. ideally you call it with a collection and 'genre' or 'artist' as
+    # the query field to get all the different genres or artists in a collection
+    # (or playlist, and any other sub-array of songs you might have...)
+    my $songs   = shift;
+    my $query   = shift;
+
+    my %info_hash = ();
+    foreach my $song (@$songs) {
+        $info_hash{$$song{$query}} = 1 if ($$song{$query});
+    }
+    return sort keys %info_hash;
 }
 
 sub read_session {
@@ -39,6 +102,41 @@ sub save_session {
         $session->param($key,$$data{$key});
     }
     $session->flush();
+}
+
+sub validate_session {
+    my $session = shift;
+
+    my $user = $session->param('username') || '';
+    my $hash = $session->param('password') || '';
+    if ($user and $hash) {
+        my $dbh = db_connect();
+        my $userq = $dbh->quote($user);
+        my $select = 'select password from users where username=' . $userq;
+        my ($pass) = $dbh->selectrow_array($select);
+        $dbh->disconnect;
+        if ($pass and ($pass eq $hash)) {
+            return 1;
+        }
+    }
+    $session->delete();
+    $session->flush();
+    return 0;
+}
+
+sub get_session_errmsg {
+    # method of passing error messages between pages
+    # invalid options called for page X, redirect to
+    # page Y after setting the session errmsg param
+    my $session = shift;
+
+    my $errmsg = '';
+    if ($session->param('errmsg')) {
+        $errmsg = '<p>error: ' . $session->param('errmsg') . '</p>';
+        $session->clear('errmsg');
+        $session->flush();
+    }
+    return $errmsg;
 }
 
 sub fisher_yates_shuffle {
