@@ -9,11 +9,13 @@ use CGI::Session qw/-ip_match/;
 
 use Jukebox;
 
+my $self = $ENV{SCRIPT_NAME};
+
+my $name = Jukebox::get_name();
 my $session = Jukebox::get_session();
 
 my $data = Jukebox::read_session($session);
 Jukebox::save_session($session,$data);
-
 
 if ($session->is_expired) {
     login_page('your session has expired');
@@ -23,22 +25,21 @@ if ($session->is_expired) {
     } else {
         login_page();
     }
-} elsif (validate_session($session)) {
-    print $session->header(-location=>'start.pl');
+} elsif (Jukebox::validate_session($session)) {
+    authenticated_page();
 } else {
     login_page('invalid session');
 }
 
 sub login_page {
     my $error = shift || '';
-    my $dev   = $$data{dev} || 0;
     $error = "<p><em>$error</em></p>" if ($error ne '');
 
-    Jukebox::page_start('Meebo Jukebox Login Page','');
+    Jukebox::page_start("$name Login Page",'');
     print qq{
     <div id='container'>
         <form method='post'>
-            <h4>Meebo Jukebox Login</h4>
+            <h4>$name Login</h4>
             <table id='login'>
                 <tr>
                     <td>username:</td>
@@ -53,7 +54,6 @@ sub login_page {
                     </td>
                 </tr>
             </table>
-            <input type='hidden' name='dev' value='$dev' />
             <input type='submit' name='action' value='login' />
         </form>
         <br/>
@@ -61,6 +61,28 @@ sub login_page {
     </div>
     </body>
 </html>};
+    exit;
+}
+
+sub authenticated_page {
+    Jukebox::page_start("$name",'');
+    my @collection = Jukebox::get_mpd_collection();
+    if (param('action')) {
+        my $action = param('action');
+        if ($action eq 'list_songs') {
+            my $field   = param('field');
+            my $item    = param('item');
+            my @songs = Jukebox::search_songs(\@collection,$field,$item);
+            foreach my $song (@songs) {
+                print "$$song{artist} - $$song{title}<br/>\n";
+            }
+        }
+    } else {
+        my @list_items = Jukebox::get_music_info(\@collection,'album');
+        my $list = Jukebox::make_html_list($self, \@list_items,'album');
+        print $list;
+    }
+    print "</body></html>"
     exit;
 }
 
@@ -73,7 +95,7 @@ sub authenticate {
     my $select = 'select password from users where username=' . $userq;
     my ($hash) = $dbh->selectrow_array($select);
     if ($hash and (crypt($pass,$hash) eq $hash)) {
-        login($user,$hash,$session);
+        Jukebox::login($user,$hash,$session);
     }
     login_page('username or password incorrect');
 }

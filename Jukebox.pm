@@ -5,9 +5,11 @@ use strict;
 use warnings;
 
 use DBI;
+use URI::Escape;
 use CGI::Session qw/-ip_match/;
 use Audio::MPD;
 
+my $name        =   'Meebo Jukebox';
 my $cgi_session =   'MPDJukebox';
 ### MySQL stuff, make this into a configuration option sometime... ###
 my $sqluser     =   "jukeboxer";
@@ -33,10 +35,14 @@ sub mpd_connect {
     return $mpd;
 }
 
+sub get_name {
+    return $name;
+}
+
 sub get_mpd_collection {
     # returns an array of 'song items'
     # this takes a short while to process, call sparingly
-    my $mpd = mpd_conect();
+    my $mpd = mpd_connect();
     return $mpd->collection->all_songs;
 }
 
@@ -82,6 +88,21 @@ sub get_music_info {
         $info_hash{$$song{$query}} = 1 if ($$song{$query});
     }
     return sort keys %info_hash;
+}
+
+sub make_html_list {
+    my $self    = shift;
+    my $items   = shift;
+    my $field   = shift;
+
+    my @list    = ();
+    foreach my $item (@$items) {
+        my $url_item = uri_escape($item);
+        my $url = "$self?field=$field&item=$url_item&action=list_songs";
+        my $list_item = "<a href='$url'>$item</a><br/>\n";
+        push @list, $list_item;
+    }
+    return join('',@list);
 }
 
 sub read_session {
@@ -212,7 +233,7 @@ sub login {
     $session->flush();
     my $cgi = CGI->new;
     my $cookie = $cgi->cookie(-name=>$session->name,-value=>$session->id);
-    print $session->header(-location=>'start.pl',-cookie=>$cookie);
+    print $session->header(-location=>'index.pl',-cookie=>$cookie);
 }
 
 1;

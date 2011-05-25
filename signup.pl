@@ -8,6 +8,7 @@ use CGI::Carp qw/fatalsToBrowser/;
 
 use Jukebox;
 
+my $name = Jukebox::get_name();
 my $session = Jukebox::get_session();
 
 if (param('create')) {
@@ -20,11 +21,11 @@ sub sign_up_page {
     my $user    = shift || '';
     my $err     = shift || '';
 
-    Jukebox::page_start('Meebo Jukebox Sign Up','');
+    Jukebox::page_start("$name Sign Up",'');
     print qq{
     <div id='container'>
         <form method='post'>
-            <p id='head'>Meebo Jukebox Sign Up:</p>
+            <p id='head'>$name Sign Up:</p>
             <table id='sign_up'>
                 <tr>
                     <td>username:</td>
