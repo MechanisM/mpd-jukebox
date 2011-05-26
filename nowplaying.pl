@@ -7,12 +7,13 @@ use Jukebox;
 
 my $current_song    = Jukebox::get_mpd_current_song();
 my @playlist        = Jukebox::get_mpd_playlist();
+my $stream          = 'http://elise.corp.meebo.com:8000/music.ogg';
 
 Jukebox::page_start('Current Playlist','');
 print qq{
     <div id='container' style='text-align: center;'>
         <h3>Now Playing: $$current_song{artist} - $$current_song{title}</h3>
-        <h4><a href="http://dasia.corp.meebo.com:8000/jukebox.ogg">Tune In</a></h4>
+        <h4><a href='$stream'>Tune In</a></h4>
         <table align='center'>
             <tr>
                 <td></td>

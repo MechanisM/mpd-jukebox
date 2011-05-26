@@ -14,7 +14,7 @@ my $cgi_session =   'MPDJukebox';
 ### MySQL stuff, make this into a configuration option sometime... ###
 my $sqluser     =   "jukeboxer";
 my $sqlpass     =   "musicisgood";
-my $sqldb       =   "mpd_jukebox";
+my $sqldb       =   "jukebox";
 my $sqlhost     =   "localhost";
 ### end db config ###
 
@@ -131,6 +131,16 @@ sub search_music {
     return $song_hash;
 }
 
+sub get_songs_by_year {
+    my $year    = shift;
+
+    my $dbh = &db_connect();
+    $year = $dbh->quote($year);
+    my $select = qq{ select * from songs where date=$year };
+    my $songs = $dbh->selectall_hashref($select,'song_id');
+    return $songs;
+}
+
 sub get_songs_from_other {
     my $type    = shift;
     my $id      = shift;
@@ -139,7 +149,7 @@ sub get_songs_from_other {
 
     my $dbh = &db_connect();
     $id = $dbh->quote($id);
-    my $select = qq{ select * from songs where ${type}_id=$id };
+    my $select = qq[ select * from songs where ${type}_id=$id ];
     my $songs_ref = $dbh->selectall_hashref($select,'song_id');
     my $info = '';
     if ($type =~ /album/) {
@@ -219,6 +229,15 @@ sub get_information {
     my $hashref = $dbh->selectall_hashref($select,$key);
     $dbh->disconnect;
     return $hashref;
+}
+
+sub get_dates {
+    my $dbh = &db_connect();
+    my $select = qq{ select distinct date from songs
+                        where date != 0 order by date };
+    my $years = $dbh->selectcol_arrayref($select);
+    $dbh->disconnect;
+    return $years;
 }
 
 sub get_file_from_id {

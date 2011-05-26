@@ -24,6 +24,7 @@ sub sign_up_page {
     Jukebox::page_start("$name Sign Up",'');
     print qq{
     <div id='container'>
+    <div id='login_page'>
         <form method='post'>
             <p id='head'>$name Sign Up:</p>
             <table id='sign_up'>
@@ -54,7 +55,7 @@ sub sign_up_page {
         <br/>
         <p><em>$err</em></p>
     } if ($err);
-    print "    </div>";
+    print "    </div></div>";
     exit;
 }
 

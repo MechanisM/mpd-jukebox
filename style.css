@@ -61,6 +61,11 @@ div#albums {
     display:        none;
 }
 
+div#by_date {
+    margin-top:     10px;
+    display:        none;
+}
+
 div#header {
     height:         40px;
     padding:        10px;

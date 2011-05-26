@@ -102,6 +102,14 @@ sub authenticated_page {
     my $albums_link = qq{<a href="javascript:field('albums');">albums</a>};
     my $artists_link = qq{<a href="javascript:field('artists');">artists</a>};
 
+    my $years = Jukebox::get_dates();
+    my $by_date = '';
+    foreach my $year (@$years) {
+        my $url = "$script?type=year&id=$year&action=list";
+        $by_date .= "<a href='$url'>$year</a><br/>\n";
+    }
+    my $by_date_link = qq{<a href="javascript:field('by_date');">by date</a>};
+
     my $main_text = '';
     if (param('action')) {
         $main_text = &process_action(param('action'),$current_song,\@playlist);
@@ -140,7 +148,7 @@ sub authenticated_page {
         <div id='midpage'>
             <div id='sidebar'>
                 <div id='sidebar_head'>
-                    $artists_link - $albums_link - $genres_link
+                    $artists_link - $albums_link - $genres_link - $by_date_link
                 </div>
                 <div id='genres'>
                     $genres
@@ -150,6 +158,9 @@ sub authenticated_page {
                 </div>
                 <div id='albums'>
                     $albums
+                </div>
+                <div id='by_date'>
+                    $by_date
                 </div>
             </div>
             <div id='main'>
@@ -226,10 +237,17 @@ $add_or_rm<br/>
     if ($action eq 'list') {
         my $type = param('type');
         my $id   = param('id');
-        return unless ($id and $type);
-        my ($item,$songs) = Jukebox::get_songs_from_other($type,$id);
-        return unless ((scalar(keys %$songs) > 0) and ($item));
-        my $info  = "<h2>$name</h2>\n";
+        return unless (($id or $id == 0) and $type);
+        my $songs = '';
+        my $item_name = '';
+        if (($type =~ /year/) and ($id =~ /^[0-9]+$/)) {
+            $songs = Jukebox::get_songs_by_year($id);
+            $item_name = $id;
+        } else {
+            ($item_name,$songs) = Jukebox::get_songs_from_other($type,$id);
+        }
+        return unless ((scalar(keys %$songs) > 0) and ($item_name));
+        my $info  = "<h2>$item_name</h2>\n";
            $info .= Jukebox::html_songs_list($songs,$script);
         return $info;
     }
