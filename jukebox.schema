@@ -17,6 +17,7 @@ drop table if exists songs;
 create table songs (
     song_id     int(10) unsigned not null auto_increment,
     artist      varchar(128),
+    title       varchar(128),
     album       varchar(128),
     genre       varchar(64),
     file        varchar(255),
