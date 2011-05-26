@@ -80,6 +80,9 @@ sub add_song {
 
     my $mpd = mpd_connect();
     $mpd->playlist->add($filename);
+    $mpd->play;
+    # enable consume mode; track is removed from playlist after playing
+    $mpd->_send_command("consume 1\n");
 }
 
 sub rm_song {
