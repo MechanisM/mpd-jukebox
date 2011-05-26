@@ -1,0 +1,13 @@
+# very basic configuration file... it's a start though...
+
+mysql_user  =   MPD-JUKEBOX
+mysql_pass  =   CANDY
+mysql_db    =   SOME_DB_NAME
+mysql_host  =   localhost
+
+mpd_host    =   localhost
+mpd_port    =   6600
+mpd_pass    =   PASSWORD_THIS_IS_SECURE!
+
+# this is to label the pages and such
+name        =   Some Jukebox

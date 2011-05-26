@@ -24,6 +24,31 @@ $mpd_options{host}      = 'localhost';
 $mpd_options{port}      = '6600';
 $mpd_options{password}  = '';
 
+
+sub read_config {
+    my $config_file = shift;
+
+    my %config = ();
+    if (!-e $config_file) {
+        print STDERR "configuration file $config_file: $!\n";
+        exit 1;
+    }
+    if (open FILE,'<',$config_file) {
+        while (<FILE>) {
+            my $line = $_;
+            next if ($line =~ /^\s*$/);
+            next if ($line =~ /^\s*#/);
+            my ($param,$value) = split(/=/,$line);
+            $param =~ s/^\s*//g;
+            $param =~ s/\s*$//g;
+            $value =~ s/^\s*//g;
+            $value =~ s/\s*$//g;
+            $config{$param} = $value;
+        }
+    }
+    return %config;
+}
+
 sub db_connect {
     my $dsn = "dbi:mysql:database=$sqldb;host=$sqlhost";
     my $dbh = DBI->connect($dsn,$sqluser,$sqlpass,{ RaiseError => 1 });
