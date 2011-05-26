@@ -48,12 +48,12 @@ div#sidebar_head {
 
 div#genres {
     margin-top:     10px;
-    display:        block;
+    display:        none;
 }
 
 div#artists {
     margin-top:     10px;
-    display:        none;
+    display:        block;
 }
 
 div#albums {

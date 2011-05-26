@@ -292,14 +292,16 @@ sub make_html_list {
 
 sub html_playlist {
     # quick, dirty hack to get an ordered playlist
-    my $script = shift;
+    my $script  = shift;
 
     my @links = ();
+
     my $mpd = &mpd_connect();
     my @playlist = $mpd->playlist->as_items;
+
     foreach my $song (@playlist) {
         my $song_hash = &get_song_by_file($$song{file});
-        push @links, linkify_song($song_hash,$script);
+        push @links, &linkify_song($song_hash,$script);
     }
     return join('',@links);
 }
@@ -314,7 +316,7 @@ sub html_songs_list {
 
     foreach my $song_id (keys %$songs) {
         my $song = $$songs{$song_id};
-        push @links, linkify_song($song,$script);
+        push @links, &linkify_song($song,$script);
     }
     return join('',@links);
 }
