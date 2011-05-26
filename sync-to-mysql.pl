@@ -133,3 +133,74 @@ foreach my $song (@all_songs) {
         }
     }
 }
+
+print "done with sql shit...\n";
+
+my $select = qq{ select file from songs };
+my $files = $dbh->selectcol_arrayref($select);
+
+# double looping = TERRIBLE... but it is faster than querying MPDs db with
+# $mpd->collection->song($file); 30s vs 17s for 5010 files.
+foreach my $file (@$files) {
+    my $found = 0;
+    foreach my $song (@all_songs) {
+        next if $found;
+        if ($$song{file} eq $file) {
+            $found = 1;
+        }
+    }
+    if ($found == 0) {
+        print "no mpd entry for $file, purging mysql\n";
+        my $fileq = $dbh->quote($file);
+        my $select = qq{ select song_id from songs where file=$fileq };
+        my ($song_id) = $dbh->selectrow_array($select);
+        if ($song_id) {
+            my $delete = qq{ delete from songs where song_id=$song_id };
+            my $rv = $dbh->do($delete);
+            if ($rv != 1) {
+                print STDERR "failed to delete song_id: $song_id ($file)\n";
+                # exit may seem harsh, but ... i don't always trust my code.
+                exit 1;
+            }
+        } else {
+            print STDERR "unable to find song_id for '$file'\n";
+            exit 1;
+        }
+    }
+}
+
+# now that we have potentially purged some songs, let's make sure there are
+# no orphaned albums, artists or genres...
+sub purge_records {
+    my $table   = shift;
+    my $type    = shift;
+    my $type_id = shift;
+
+    my $select = qq{ select $type_id from $table };
+    my $ids = $dbh->selectcol_arrayref($select);
+    foreach my $id (@$ids) {
+        my $select = qq{ select song_id from songs where $type_id=$id limit 1 };
+        my ($song_id) = $dbh->selectrow_array($select);
+        if ($song_id) {
+            next;
+        } else {
+            my $select = qq{ select $type from $table where $type_id=$id };
+            my ($name) = $dbh->selectrow_array($select);
+            if ($name) {
+                print "no songs found for $type_id: $id ($name), purging\n";
+                my $delete = qq{ delete from $table where $type_id=$id };
+                my $rv = $dbh->do($delete);
+                if ($rv != 1) {
+                    print STDERR "failed to delete $type_id: $id ($name)\n";
+                    exit 1;
+                }
+            } else {
+                print STDERR "could not find $type_id: $id in database\n";
+                exit 1;
+            }
+        }
+    }
+}
+purge_records('albums','album','album_id');
+purge_records('artists','artist','artist_id');
+purge_records('genres','genre','genre_id');
