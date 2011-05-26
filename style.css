@@ -20,13 +20,42 @@ div.sidebar {
     margin:         20px auto;
     position:       absolute;
     background:     #424242;
-    top:            20px;
+    top:            50px;
     left:           20px;
-    padding-left:   10px;
-    padding-right:  10px;
+    padding-left:   15px;
     width:          200px;
     font-size:      10pt;
     text-align:     left;
+}
+
+div.sidebar-head {
+    position:       absolute;
+    top:            45px;
+    left:           20px;
+    width:          200px;
+    font-size:      9pt;
+    text-align:     center;
+}
+
+div#header {
+    width:          100%;
+    height:         50px;
+    font-size:      9pt;
+    text-align:     left;
+}
+
+div#title {
+    text-size:      14pt;
+    width:          50%;
+}
+
+div#search {
+    text-align:     right;
+}
+
+div#logout {
+    text-align:     right;
+    font-size:      8pt;
 }
 
 div#genres {
@@ -71,8 +100,9 @@ table#manual_options {
     visibility: hidden;
 }
 
-p#logout {
+span#logout {
     text-align: right;
+    font-size: 8pt;
 }
 
 p#head {
@@ -88,20 +118,4 @@ a:link {
 a:visited {
 	color: #DDD;
 	text-decoration: none;
-}
-
-p#bonus {
-    font-size: 18px;
-    color: #FA0080;
-    font-weight: bolder;
-    text-transform: uppercase; 
-}
-
-img#atg_img {
-    max-width: 350px;
-    max-height: 800px;
-}
-
-img#admin {
-    max-height: 350px;
 }

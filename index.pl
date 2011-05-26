@@ -78,7 +78,23 @@ sub authenticated_page {
 
     print qq{
 
-    $artists_link - $albums_link - $genres_link<br/>
+    <div id='header'>
+        <div id='title'>
+            $name
+        </div>
+        <div id='logout'>
+            <a href='logout.pl'>log out</a>
+        </div>
+        <div id='search'>
+            <form action='post'>
+                <input type='text' name='criteria' value='' />
+                <input type='submit' name='search' value='search' />
+            </form>
+        </div>
+    </div>
+    <div class='sidebar-head'>
+    $artists_link - $albums_link - $genres_link
+    </div>
     <div id='genres' class='sidebar'>
         $genres
     </div>
