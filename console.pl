@@ -49,7 +49,7 @@ my $current_song        = $mpd->song;
 #my @albums  = get_info(\@all_songs,'album');
 
 #my @songs = search_songs(\@all_songs,'artist','nine inch nails');
-my @songs = search_songs(\@all_songs,'file','The Sea');
+my @songs = search_songs(\@all_songs,'file','Long Tall Weekend');
 foreach my $song (@songs) {
     my $id = $song->id;
     print "$id\n";

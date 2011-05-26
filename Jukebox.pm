@@ -100,29 +100,164 @@ sub search_songs {
     return @found;
 }
 
-sub add_song {
-    my $filename = shift;
+sub search_music {
+    my $query   = shift;
 
-    my $mpd = mpd_connect();
-    $mpd->playlist->add($filename);
-    $mpd->play;
-    # enable consume mode; track is removed from playlist after playing
-    $mpd->_send_command("consume 1\n");
+    my $dbh = &db_connect();
+    $query = $dbh->quote($query);
+
+    my @songs = ();
+
+    foreach my $type ('album', 'artist', 'song') {
+        my $select = qq[ select ${type}_id from ${type}s
+                        where $type like '%$query%' ];
+        my $ids = $dbh->selectcol_arrayref($select);
+        foreach my $id (@$ids) {
+            my $select = qq[ select song_id from songs
+                        where ${type}_id=$id ];
+            my $song_ids = $dbh->selectcol_arrayref($select);
+            foreach my $id (@$song_ids) {
+                push @songs, $id;
+            }
+        }
+    }
+    my $song_hash = '';
+    if (scalar(@songs) > 0) {
+        my $select  = "select * from songs where song_id=";
+           $select .= join(' or song_id=',@songs);
+        $song_hash = $dbh->selectall_hashref($select,'song_id');
+    }
+    $dbh->disconnect;
+    return $song_hash;
 }
 
-sub rm_song {
-    my $songs   = shift;
-    my $file    = shift;
+sub get_songs_from_other {
+    my $type    = shift;
+    my $id      = shift;
 
-    my $pos = -1;
-    foreach my $song (@$songs) {
-        $pos = $$song{pos} if ($$song{file} eq $file);
+    return unless ($type =~ /(genre|album|artist)/);
+
+    my $dbh = &db_connect();
+    $id = $dbh->quote($id);
+    my $select = qq{ select * from songs where ${type}_id=$id };
+    my $songs_ref = $dbh->selectall_hashref($select,'song_id');
+    my $info = '';
+    if ($type =~ /album/) {
+        my $select = "select album,artist_id from albums where album_id=$id";
+        my ($album,$artist_id) = $dbh->selectrow_array($select);
+        $id = $artist_id;
+        $type = 'artist';
+        $info = "$album by ";
     }
+    $select = qq[ select $type from ${type}s where ${type}_id=$id ];
+    my ($name) = $dbh->selectrow_array($select);
+
+    return "$info$name",$songs_ref;
+}
+
+sub get_all_song_info {
+    my $dbh = &db_connect();
+    my $select = qq{ select * from songs };
+    my $songs = $dbh->selectall_hashref($select,'song_id');
+    $dbh->disconnect;
+    return $songs;
+} 
+
+sub convert_playlist {
+    my $playlist = shift;
+
+    my %songs = ();
+    foreach my $song (@$playlist) {
+        my $song_hash = &get_song_by_file($$song{file});
+        $songs{$$song_hash{song_id}} = $song_hash;
+    }
+    return \%songs;
+}
+
+sub get_song_by_id {
+    my $song_id = shift;
+
+    my $dbh = &db_connect();
+    $song_id = $dbh->quote($song_id);
+    my $select = qq{ select * from songs where song_id=$song_id };
+    my $song_hash = $dbh->selectrow_hashref($select);
+    $dbh->disconnect;
+    return $song_hash;
+}
+
+sub get_song_by_file {
+    my $file = shift;
+
+    my $dbh = &db_connect();
+    $file = $dbh->quote($file);
+    my $select = qq{ select * from songs where file=$file };
+    my $song_hash = $dbh->selectrow_hashref($select);
+    $dbh->disconnect;
+    return $song_hash;
+}
+
+sub get_name_by_id {
+    my $type    = shift;
+    my $id      = shift;
+
+    my $dbh = &db_connect();
+    my $select = qq[ select $type from ${type}s where ${type}_id=$id ];
+    my ($name) = $dbh->selectrow_array($select);
+    $dbh->disconnect;
+    return $name;
+}
+
+sub get_information {
+    my $key     = shift;
+    my $table   = shift;
+
+    # this causes duplicate data, hopefully memory doesn't become an issue
+    # if it does... this could be a small memory extravagance.
+    my $keyid = "${key}_id";
+    my $dbh = &db_connect();
+    my $select = qq{ select *,$keyid as id from $table };
+    my $hashref = $dbh->selectall_hashref($select,$key);
+    $dbh->disconnect;
+    return $hashref;
+}
+
+sub get_file_from_id {
+    my $song_id = shift;
+
+    my $dbh = &db_connect();
+    $song_id = $dbh->quote($song_id);
+    my $select = qq{ select file from songs where song_id=$song_id };
+    my ($file) = $dbh->selectrow_array($select);
+    print STDERR "HELLO: $song_id ... $file\n";
+    $dbh->disconnect;
+    return $file;
+} 
+
+sub rm_song {
+    my $file = shift;
 
     my $mpd = mpd_connect();
+    my @playlist = $mpd->playlist->as_items;
+    my $pos = -1;
+    foreach my $song (@playlist) {
+        $pos = $$song{pos} if ($$song{file} eq $file);
+    }
     if ($pos != -1) {
         $mpd->playlist->delete($pos);
     }
+    return undef;
+}
+
+sub add_song {
+    my $file = shift;
+
+    my $mpd = &mpd_connect();
+    print STDERR "$file\n";
+    $mpd->playlist->add("$file");
+    $mpd->play;
+    # enable consume mode; track is removed from playlist after playing
+    $mpd->_send_command("consume 1\n");
+    return undef;
 }
 
 sub get_music_info {
@@ -157,17 +292,33 @@ sub make_html_list {
     return join('',@list);
 }
 
-sub linkify_song {
+sub html_songs_list {
+    # hash reference
+    my $songs   = shift;
     my $script  = shift;
-    my $song    = shift;
-    my $action  = shift;
 
-    my $url_filename = uri_escape($$song{file});
-    my $link  = "<a href='$script?action=$action&song=$url_filename'>";
-       $link .= "$$song{artist} - $$song{title}</a>";
-    return $link;
+    my @links = ();
+
+    foreach my $song_id (keys %$songs) {
+        my $song = $$songs{$song_id};
+        push @links, linkify_song($song,$script);
+    }
+    return join('',@links);
 }
 
+sub linkify_song {
+    my $song    = shift;
+    my $script  = shift;
+
+    my $dbh = &db_connect();
+    my $select = "select artist from artists where artist_id=$$song{artist_id}";
+    my ($artist) = $dbh->selectrow_array($select);
+    $dbh->disconnect;
+
+    my $url = "$script?action=show&song_id=$$song{song_id}";
+    return "<a href='$url'>$artist - $$song{title}</a><br/>\n";
+}
+    
 sub read_session {
     my $session = shift;
 
