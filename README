@@ -23,10 +23,17 @@ audio_output {
 install mpd, icecast2, and mysql-server, and ... yeah, i'll get more info
 here... someday...
 
-TODO
-clean up the user interface, make it look nice
-add voting, vote up songs to move up the playlist, vote down to remove them
-karma system, encouraging up-votes
-vote for output to speakers, instead of just streaming
-ambient volume voting (for an office or communal jukebox)
-... more
+TODO (in rough order of likelihood i'll get around to them...)
+-clean up the user interface
+-multiple streaming stations
+-bring in mpd-similar project to suggest songs
+-display/fetch album artwork
+-add voting
+    -vote a song up songs to move it up the playlist
+    -vote down to remove the song (with enough votes)
+-karma system
+    -encourage upvoting
+    -discourage excessive downvoting
+    -restrict number of songs able to add depending on karma
+-vote for output to speakers, in addition to streaming
+-ambient volume voting (for an office or communal jukebox)
