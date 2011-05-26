@@ -23,13 +23,6 @@ while ($not_ready) {
 }
 
 foreach my $song (@all_songs) {
-    foreach my $key (keys %$song) {
-        print "$key: $$song{$key}\n";
-    }
-    exit;
-}
-
-foreach my $song (@all_songs) {
     # 'safe' defaults.
     my $date    = 0;
     my $track   = 0;
