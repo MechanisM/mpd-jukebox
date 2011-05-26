@@ -13,3 +13,14 @@ create table users (
     primary key (user_id)
 );
     
+drop table if exists songs;
+create table songs (
+    song_id     int(10) unsigned not null auto_increment,
+    artist      varchar(128),
+    album       varchar(128),
+    genre       varchar(64),
+    file        varchar(255),
+    date        varchar(16),
+    track       int(5) not null,
+    primary key (song_id)
+);
