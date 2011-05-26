@@ -9,7 +9,7 @@ use CGI::Session qw/-ip_match/;
 
 use Jukebox;
 
-my $self = $ENV{SCRIPT_NAME};
+my $script = $ENV{SCRIPT_NAME};
 
 my $name = Jukebox::get_name();
 my $session = Jukebox::get_session();
@@ -67,22 +67,29 @@ sub login_page {
 sub authenticated_page {
     Jukebox::page_start("$name",'');
     my @collection = Jukebox::get_mpd_collection();
-    if (param('action')) {
-        my $action = param('action');
-        if ($action eq 'list_songs') {
-            my $field   = param('field');
-            my $item    = param('item');
-            my @songs = Jukebox::search_songs(\@collection,$field,$item);
-            foreach my $song (@songs) {
-                print "$$song{artist} - $$song{title}<br/>\n";
-            }
-        }
-    } else {
-        my @list_items = Jukebox::get_music_info(\@collection,'album');
-        my $list = Jukebox::make_html_list($self, \@list_items,'album');
-        print $list;
-    }
-    print "</body></html>"
+
+    my $genres = Jukebox::make_html_list($script,\@collection,'genre');
+    my $artists = Jukebox::make_html_list($script,\@collection,'artist');
+    my $albums = Jukebox::make_html_list($script,\@collection,'album');
+
+    my $genres_link = qq{<a href="javascript:field('genres');">genres</a>};
+    my $albums_link = qq{<a href="javascript:field('albums');">albums</a>};
+    my $artists_link = qq{<a href="javascript:field('artists');">artists</a>};
+
+    print qq{
+
+    $artists_link - $albums_link - $genres_link<br/>
+    <div id='genres' class='sidebar'>
+        $genres
+    </div>
+    <div id='artists' class='sidebar'>
+        $artists
+    </div>
+    <div id='albums' class='sidebar'>
+        $albums
+    </div>};
+
+    print "</body></html>";
     exit;
 }
 

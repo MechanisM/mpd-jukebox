@@ -91,14 +91,16 @@ sub get_music_info {
 }
 
 sub make_html_list {
-    my $self    = shift;
-    my $items   = shift;
+    my $script  = shift;
+    my $songs   = shift;
     my $field   = shift;
 
+    my @items = get_music_info($songs,$field);
+    
     my @list    = ();
-    foreach my $item (@$items) {
+    foreach my $item (@items) {
         my $url_item = uri_escape($item);
-        my $url = "$self?field=$field&item=$url_item&action=list_songs";
+        my $url = "$script?field=$field&item=$url_item&action=list_songs";
         my $list_item = "<a href='$url'>$item</a><br/>\n";
         push @list, $list_item;
     }
@@ -210,6 +212,7 @@ $extraheaders
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
     <link rel="icon" href="mpd.ico" type="image/x-icon">
     <link rel="shortcut icon" href="mpd.ico" type="image/x-icon">
+    <script type='text/javascript' src='jukebox.js'></script>
     <style type="text/css">\@import "style.css";</style>
   </head>
   <body>

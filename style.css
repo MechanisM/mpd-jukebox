@@ -16,6 +16,31 @@ div#main {
     display:    block;
 }
 
+div.sidebar {
+    margin:         20px auto;
+    position:       absolute;
+    background:     #424242;
+    top:            20px;
+    left:           20px;
+    padding-left:   10px;
+    padding-right:  10px;
+    width:          200px;
+    font-size:      10pt;
+    text-align:     left;
+}
+
+div#genres {
+    display:    block;
+}
+
+div#artists {
+    display:    none;
+}
+
+div#albums {
+    display:    none;
+}
+
 table.options {
     margin: 10px auto;
     width: 250px;
