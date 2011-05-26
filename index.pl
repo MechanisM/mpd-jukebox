@@ -67,7 +67,6 @@ sub login_page {
 }
 
 sub authenticated_page {
-    Jukebox::page_start("$name",'');
 
     # this takes 2-5s to do... with a small collection...
     my @collection = Jukebox::get_mpd_collection();
@@ -126,12 +125,14 @@ sub authenticated_page {
             if (param('song')) {
                 my $filename = param('song');
                 Jukebox::add_song($filename);
+                print $session->header(-location=>'index.pl');
             }
         }
         if ($action eq 'rm') {
             if (param('song')) {
                 my $filename = param('song');
                 Jukebox::rm_song(\@playlist,$filename);
+                print $session->header(-location=>'index.pl');
             }
         }
     } else {
@@ -144,11 +145,12 @@ sub authenticated_page {
             $main_text .= "$url<br/>\n";
         }
     }
+    Jukebox::page_start("$name",'');
     print qq{
     <div id='container'>
         <div id='header'>
             <div id='title'>
-                $name
+                <a href='$script'>$name</a>
             </div>
             <div id='search'>
                 <form method='post'>
