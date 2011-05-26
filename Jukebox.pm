@@ -228,7 +228,6 @@ sub get_file_from_id {
     $song_id = $dbh->quote($song_id);
     my $select = qq{ select file from songs where song_id=$song_id };
     my ($file) = $dbh->selectrow_array($select);
-    print STDERR "HELLO: $song_id ... $file\n";
     $dbh->disconnect;
     return $file;
 } 
@@ -252,7 +251,6 @@ sub add_song {
     my $file = shift;
 
     my $mpd = &mpd_connect();
-    print STDERR "$file\n";
     $mpd->playlist->add("$file");
     $mpd->play;
     # enable consume mode; track is removed from playlist after playing
@@ -291,6 +289,21 @@ sub make_html_list {
     }
     return join('',@list);
 }
+
+sub html_playlist {
+    # quick, dirty hack to get an ordered playlist
+    my $script = shift;
+
+    my @links = ();
+    my $mpd = &mpd_connect();
+    my @playlist = $mpd->playlist->as_items;
+    foreach my $song (@playlist) {
+        my $song_hash = &get_song_by_file($$song{file});
+        push @links, linkify_song($song_hash,$script);
+    }
+    return join('',@links);
+}
+        
 
 sub html_songs_list {
     # hash reference

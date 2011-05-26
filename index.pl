@@ -117,7 +117,7 @@ sub authenticated_page {
 
         $main_text  = "<h2>Now Playing: $url</h2>\n";
         $main_text .= "<h4>Playlist:<h4>\n";
-        $main_text .= Jukebox::html_songs_list($pls,$script);
+        $main_text .= Jukebox::html_playlist($pls,$script);
     }
 
     Jukebox::page_start("$name",'');
