@@ -1,0 +1,32 @@
+So... this is a steaming pile of feces at this point...
+
+very basic operation at the moment, allows adding and removing of songs from
+the playlist...
+
+I have plans to bring a lot more to this project, but it's out there, in case
+anyone else wants to take a crack at it.
+
+
+add the following to mpd.conf to enable streaming:
+audio_output {
+    type        "shout"
+    encoding    "ogg"           # optional
+    name        "Jukebox"
+    host        "localhost"
+    port        "8000"
+    mount       "/jukebox.ogg"
+    password    "hackmelol"
+    bitrate     "192"
+    format      "44100:16:1"
+}
+
+install mpd, icecast2, and mysql-server, and ... yeah, i'll get more info
+here... someday...
+
+TODO
+clean up the user interface, make it look nice
+add voting, vote up songs to move up the playlist, vote down to remove them
+karma system, encouraging up-votes
+vote for output to speakers, instead of just streaming
+ambient volume voting (for an office or communal jukebox)
+... more
