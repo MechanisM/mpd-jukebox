@@ -104,11 +104,10 @@ sub search_music {
     my $query   = shift;
 
     my $dbh = &db_connect();
-    $query = $dbh->quote($query);
 
     my @songs = ();
 
-    foreach my $type ('album', 'artist', 'song') {
+    foreach my $type ('album', 'artist') {
         my $select = qq[ select ${type}_id from ${type}s
                         where $type like '%$query%' ];
         my $ids = $dbh->selectcol_arrayref($select);
@@ -121,14 +120,21 @@ sub search_music {
             }
         }
     }
-    my $song_hash = '';
+
+    my $select = qq{ select song_id from songs where title like '%$query%' };
+    my $ids = $dbh->selectcol_arrayref($select);
+    foreach my $id (@{$ids}) {
+        push @songs,$id;
+    }
+
+    my $songs_hash;
     if (scalar(@songs) > 0) {
         my $select  = "select * from songs where song_id=";
            $select .= join(' or song_id=',@songs);
-        $song_hash = $dbh->selectall_hashref($select,'song_id');
+        $songs_hash = $dbh->selectall_hashref($select,'song_id');
     }
     $dbh->disconnect;
-    return $song_hash;
+    return $songs_hash;
 }
 
 sub get_songs_by_year {

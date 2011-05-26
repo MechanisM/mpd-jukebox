@@ -137,7 +137,7 @@ sub authenticated_page {
             </div>
             <div id='search'>
                 <form method='post'>
-                    <input type='text' name='search' value='' />
+                    <input type='text' name='query' value='' />
                     <input type='submit' name='action' value='search' />
                 </form>
                 <span id='logout'>
