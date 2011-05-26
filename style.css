@@ -1,74 +1,94 @@
-body {
-	font-family: Verdana,Arial,Helvetica,sans-serif;
-	font-size: 8pt;
-    text-align: center;
-	background:	none repeat scroll 0 0 #000000;
-	color:		#FFF;
+body,
+html {
+	font-family:    Verdana,Arial,Helvetica,sans-serif;
+	font-size:      10pt;
+	background:	    none repeat scroll 0 0 #000000;
+	color:		    #FFFFFF;
+    margin:         0;
+    padding:        0;
 }
 
 div#container {
-    display:    block;
-    position:   relative;
-    width:      100%;
+    width:          100%;
+}
+
+div#midpage {
+    background:     #101010;
+    margin-left:    75px;
+    margin-right:   75px;
+    clear:          both;
 }
 
 div#main {
-    display:    block;
+    float:          right;
+    width:          700px;
+    background:     #111111;
+    top:            50px;
+    
 }
 
-div.sidebar {
-    margin:         20px auto;
-    position:       absolute;
-    background:     #424242;
-    top:            50px;
+div#sidebar {
+    float:          left;
+    background:     #111;
+    top:            25px;
     left:           20px;
-    padding-left:   15px;
+    padding:        10px;
     width:          200px;
-    font-size:      10pt;
+    font-size:      9pt;
     text-align:     left;
 }
 
-div.sidebar-head {
-    position:       absolute;
-    top:            45px;
-    left:           20px;
-    width:          200px;
+div#sidebar_head {
+    width:          100%;
+    padding:        0;
     font-size:      9pt;
+    background:     #000;
     text-align:     center;
 }
 
+div#genres {
+    margin-top:     10px;
+    display:        block;
+}
+
+div#artists {
+    margin-top:     10px;
+    display:        none;
+}
+
+div#albums {
+    margin-top:     10px;
+    display:        none;
+}
+
 div#header {
-    width:          100%;
-    height:         50px;
-    font-size:      9pt;
+    height:         40px;
+    padding:        10px;
     text-align:     left;
 }
 
+div#login_page {
+    text-align:     center;
+}
+
 div#title {
-    text-size:      14pt;
+    float:          left;
     width:          50%;
+    font-size:      18px;
 }
 
 div#search {
+    float:          left;
+    width:          50%;
     text-align:     right;
 }
 
 div#logout {
-    text-align:     right;
+    text-align:     left;
     font-size:      8pt;
 }
 
-div#genres {
-    display:    block;
-}
 
-div#artists {
-    display:    none;
-}
-
-div#albums {
-    display:    none;
-}
 
 table.options {
     margin: 10px auto;

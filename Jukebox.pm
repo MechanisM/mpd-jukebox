@@ -75,6 +75,28 @@ sub search_songs {
     return @found;
 }
 
+sub add_song {
+    my $filename = shift;
+
+    my $mpd = mpd_connect();
+    $mpd->playlist->add($filename);
+}
+
+sub rm_song {
+    my $songs   = shift;
+    my $file    = shift;
+
+    my $pos = -1;
+    foreach my $song (@$songs) {
+        $pos = $$song{pos} if ($$song{file} eq $file);
+    }
+
+    my $mpd = mpd_connect();
+    if ($pos != -1) {
+        $mpd->playlist->delete($pos);
+    }
+}
+
 sub get_music_info {
     # takes an array-ref of song items, and finds all the unique entries for the
     # query. ideally you call it with a collection and 'genre' or 'artist' as
@@ -105,6 +127,17 @@ sub make_html_list {
         push @list, $list_item;
     }
     return join('',@list);
+}
+
+sub linkify_song {
+    my $script  = shift;
+    my $song    = shift;
+    my $action  = shift;
+
+    my $url_filename = uri_escape($$song{file});
+    my $link  = "<a href='$script?action=$action&song=$url_filename'>";
+       $link .= "$$song{artist} - $$song{title}</a>";
+    return $link;
 }
 
 sub read_session {

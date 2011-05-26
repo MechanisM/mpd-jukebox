@@ -42,6 +42,19 @@ my @all_songs           = $mpd->collection->all_songs;
 my @current_playlist    = $mpd->playlist->as_items;
 my $current_song        = $mpd->song;
 
+foreach my $song (@current_playlist) {
+    foreach my $key (keys %$song) {
+        print "$key: $$song{$key}\n";
+    }
+    print "\n";
+}
+exit;
+
+foreach my $song (@all_songs) {
+    print $song->id,"\n";
+    exit;
+}
+
 # just a demo of how to get information from the collection...
 my @genres  = get_info(\@all_songs,'genre');
 #my @artists = get_info(\@all_songs,'artist');
@@ -53,8 +66,10 @@ foreach my $genre (@genres) {
 }
 
 #my @songs = search_songs(\@all_songs,'artist','nine inch nails');
-my @songs = search_songs(\@all_songs,'genre','Humour');
+my @songs = search_songs(\@all_songs,'file','Fairytale');
 foreach my $song (@songs) {
+    my $id = $song->id;
+    print "$id\n";
     foreach my $key (keys %$song) {
         print "$key: $$song{$key}\n";
     }

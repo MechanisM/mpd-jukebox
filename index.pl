@@ -38,6 +38,7 @@ sub login_page {
     Jukebox::page_start("$name Login Page",'');
     print qq{
     <div id='container'>
+    <div id='login_page'>
         <form method='post'>
             <h4>$name Login</h4>
             <table id='login'>
@@ -59,6 +60,7 @@ sub login_page {
         <br/>
         $error
     </div>
+    </div>
     </body>
 </html>};
     exit;
@@ -66,7 +68,12 @@ sub login_page {
 
 sub authenticated_page {
     Jukebox::page_start("$name",'');
+
+    # this takes 2-5s to do... with a small collection...
     my @collection = Jukebox::get_mpd_collection();
+
+    my $current_song = Jukebox::get_mpd_current_song();
+    my @playlist = Jukebox::get_mpd_playlist();
 
     my $genres = Jukebox::make_html_list($script,\@collection,'genre');
     my $artists = Jukebox::make_html_list($script,\@collection,'artist');
@@ -76,36 +83,107 @@ sub authenticated_page {
     my $albums_link = qq{<a href="javascript:field('albums');">albums</a>};
     my $artists_link = qq{<a href="javascript:field('artists');">artists</a>};
 
+    my $main_text = "";
+
+    if (param('action')) {
+        my $action = param('action');
+        if ($action eq 'show') {
+            if (param('song')) {
+                my $filename = param('song');
+                my $in_playlist = 0;
+                my ($song) = Jukebox::search_songs(\@collection,'file',$filename);
+                foreach my $playlist_song (@playlist) {
+                    $in_playlist = 1 if ($$song{file} eq $$playlist_song{file});
+                }
+                $main_text = "$$song{artist} - $$song{title} from $$song{album}";
+                $main_text .= "<br/>\n";
+                if ($$current_song{file} eq $$song{file}) {
+                    $main_text .= "currently playing<br/>\n";
+                } else {
+                    if ($in_playlist) {
+                        my $url = Jukebox::linkify_song($script,$song,'rm');
+                        $main_text .= "remove: $url\n";
+                    } else {
+                        my $url = Jukebox::linkify_song($script,$song,'add');
+                        $main_text .= "add: $url\n";
+                    }
+                }
+            }
+        }
+        if ($action eq 'list_songs') {
+            if (param('field') and param('item')) {
+                my $field   = param('field');
+                my $item    = param('item');
+                my @songs = Jukebox::search_songs(\@collection,$field,$item);
+                $main_text = "<h3>$field: $item<h3><h4>Songs:</h4>\n";
+                foreach my $song (@songs) {
+                    my $url = Jukebox::linkify_song($script,$song,'show');
+                    $main_text .= "$url<br/>\n";
+                }
+            }
+        }
+        if ($action eq 'add') {
+            if (param('song')) {
+                my $filename = param('song');
+                Jukebox::add_song($filename);
+            }
+        }
+        if ($action eq 'rm') {
+            if (param('song')) {
+                my $filename = param('song');
+                Jukebox::rm_song(\@playlist,$filename);
+            }
+        }
+    } else {
+        my $url = Jukebox::linkify_song($script,$current_song,'show');
+
+        $main_text = "<h3>Now Playing: $url</h3><h4>Playlist:<h4>\n";
+        foreach my $song (@playlist) {
+            next if ($$song{id} eq $$current_song{id});
+            my $url = Jukebox::linkify_song($script,$song,'show');
+            $main_text .= "$url<br/>\n";
+        }
+    }
     print qq{
-
-    <div id='header'>
-        <div id='title'>
-            $name
+    <div id='container'>
+        <div id='header'>
+            <div id='title'>
+                $name
+            </div>
+            <div id='search'>
+                <form method='post'>
+                    <input type='text' name='criteria' value='' />
+                    <input type='submit' name='search' value='search' />
+                </form>
+                <span id='logout'>
+                    <a href='logout.pl'>log out</a>
+                </span>
+            </div>
         </div>
-        <div id='logout'>
-            <a href='logout.pl'>log out</a>
+        <div id='midpage'>
+            <div id='sidebar'>
+                <div id='sidebar_head'>
+                    $artists_link - $albums_link - $genres_link
+                </div>
+                <div id='genres'>
+                    $genres
+                </div>
+                <div id='artists'>
+                    $artists
+                </div>
+                <div id='albums'>
+                    $albums
+                </div>
+            </div>
+            <div id='main'>
+                <a href='$script'>Main Page</a><br/><br/>
+                $main_text
+            </div>
         </div>
-        <div id='search'>
-            <form action='post'>
-                <input type='text' name='criteria' value='' />
-                <input type='submit' name='search' value='search' />
-            </form>
-        </div>
     </div>
-    <div class='sidebar-head'>
-    $artists_link - $albums_link - $genres_link
-    </div>
-    <div id='genres' class='sidebar'>
-        $genres
-    </div>
-    <div id='artists' class='sidebar'>
-        $artists
-    </div>
-    <div id='albums' class='sidebar'>
-        $albums
-    </div>};
-
-    print "</body></html>";
+</body>
+</html>
+};
     exit;
 }
 
