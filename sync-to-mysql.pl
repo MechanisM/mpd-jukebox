@@ -43,7 +43,8 @@ foreach my $song (@all_songs) {
     my $select = qq{ select song_id from songs where file=$fileq };
     my ($song_id) = $dbh->selectrow_array($select);
     if ($song_id) {
-        print "$song already in sql...\n";
+        # debug code... too lazy to make a switch for it...
+        #print "$song already in sql...\n";
         next;
     }
 
