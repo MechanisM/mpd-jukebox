@@ -12,16 +12,38 @@ create table users (
     rejected    int not null default 0,
     primary key (user_id)
 );
-    
+
+drop table if exists artists;
+create table artists (
+    artist_id   int(10) unsigned not null auto_increment,
+    artist      varchar(128),
+    primary key (artist_id)
+);
+
+drop table if exists albums;
+create table albums (
+    album_id    int(10) unsigned not null auto_increment,
+    artist_id   int(10),
+    album       varchar(128),
+    primary key (album_id)
+);
+
+drop table if exists genres;
+create table genres (
+    genre_id    int(10) unsigned not null auto_increment,
+    genre       varchar(64),
+    primary key (genre_id)
+);
+
 drop table if exists songs;
 create table songs (
     song_id     int(10) unsigned not null auto_increment,
-    artist      varchar(128),
     title       varchar(128),
-    album       varchar(128),
-    genre       varchar(64),
+    artist_id   int(10),
+    album_id    int(10),
+    genre_id    int(10),
     file        varchar(255),
-    date        varchar(16),
-    track       int(5) not null,
+    date        int(8),
+    track       int(8) not null,
     primary key (song_id)
 );
