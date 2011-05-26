@@ -109,6 +109,24 @@ sub authenticated_page {
                 }
             }
         }
+        if ($action eq 'search') {
+            my $search = param('search');
+            if ($search) {
+                $main_text = "<h3>search for: $search</h3><h4>Songs:</h4>\n";
+                my @found = ();
+                foreach my $song (@collection) {
+                    if (($$song{title} =~ /$search/i) or
+                        ($$song{artist} =~ /$search/i) or
+                        ($$song{album} =~ /$search/i)) {
+                        push(@found,$song);
+                    }
+                }
+                foreach my $song (@found) {
+                    my $url = Jukebox::linkify_song($script,$song,'show');
+                    $main_text .= "$url<br/>\n";
+                }
+            }
+        } 
         if ($action eq 'list_songs') {
             if (param('field') and param('item')) {
                 my $field   = param('field');
@@ -154,8 +172,8 @@ sub authenticated_page {
             </div>
             <div id='search'>
                 <form method='post'>
-                    <input type='text' name='criteria' value='' />
-                    <input type='submit' name='search' value='search' />
+                    <input type='text' name='search' value='' />
+                    <input type='submit' name='action' value='search' />
                 </form>
                 <span id='logout'>
                     <a href='logout.pl'>log out</a>

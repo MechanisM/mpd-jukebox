@@ -10,7 +10,7 @@ my @playlist        = Jukebox::get_mpd_playlist();
 
 Jukebox::page_start('Current Playlist','');
 print qq{
-    <div id='container'>
+    <div id='container' style='text-align: center;'>
         <h3>Now Playing: $$current_song{artist} - $$current_song{title}</h3>
         <h4><a href="http://dasia.corp.meebo.com:8000/jukebox.ogg">Tune In</a></h4>
         <table align='center'>
