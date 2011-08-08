@@ -177,7 +177,7 @@ sub get_all_song_info {
     my $songs = $dbh->selectall_hashref($select,'song_id');
     $dbh->disconnect;
     return $songs;
-} 
+}
 
 sub convert_playlist {
     my $playlist = shift;
@@ -255,7 +255,7 @@ sub get_file_from_id {
     my ($file) = $dbh->selectrow_array($select);
     $dbh->disconnect;
     return $file;
-} 
+}
 
 sub rm_song {
     my $file = shift;
@@ -304,7 +304,7 @@ sub make_html_list {
     my $field   = shift;
 
     my @items = get_music_info($songs,$field);
-    
+
     my @list    = ();
     foreach my $item (@items) {
         my $url_item = uri_escape($item);
@@ -330,7 +330,6 @@ sub html_playlist {
     }
     return join('',@links);
 }
-        
 
 sub html_songs_list {
     # hash reference
@@ -358,7 +357,7 @@ sub linkify_song {
     my $url = "$script?action=show&song_id=$$song{song_id}";
     return "<a href='$url'>$artist - $$song{title}</a><br/>\n";
 }
-    
+
 sub read_session {
     my $session = shift;
 
